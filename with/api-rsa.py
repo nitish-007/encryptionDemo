@@ -13,21 +13,23 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app)
 
 def decrypt_content(encrypted_text):
-    f = open("keys/private.pem", "rb")
-    key = str(f.read().decode('utf-8')).strip()
+    f = open("./keys/private.pem", "rb")
+    key = str(f.read().decode('utf-8'))
     pkey = RSA.importKey(key)
     cipher = PKCS1_OAEP.new(pkey, hashAlgo=SHA256)
     decrypted_message = cipher.decrypt(b64decode(encrypted_text))
-    return decrypted_message
+    return decrypted_message.decode('utf-8')
 
 @app.route('/login', methods=['POST'])
 @cross_origin()
 def login():
     try:
-        data = decrypt_content(request.data.decode('utf-8'))
-        json_data = json.loads(data.decode('utf-8'))
-    except Exception:
-        return jsonify({'status': 'Fail', 'message': 'Data error'})
+        etext = request.data.decode('utf-8')
+        data = decrypt_content(etext)
+
+        json_data = json.loads(data)
+    except Exception as e:
+        return jsonify({'status': str(e), 'message': 'Data error'})
     else:
         username = str(json_data['username']).strip()
         password = str(json_data['password']).strip()

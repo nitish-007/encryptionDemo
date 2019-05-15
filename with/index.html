@@ -24,6 +24,7 @@
             }
             let publicKey = forge.pki.publicKeyFromPem(pem_file);
             let secretMessage = JSON.stringify(reqBody);
+            console.log(pem_file)
             let encrypted = publicKey.encrypt(secretMessage, "RSA-OAEP", {
                 md: forge.md.sha256.create()
             });
